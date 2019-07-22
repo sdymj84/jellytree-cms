@@ -1,45 +1,154 @@
-/* 
-  Fetch all products data in here
-  and pass them down to ProductVariationTable component to render variations
-*/
-
-import React, { useState } from 'react'
+import React, { Component } from 'react'
 import ReactTable from 'react-table'
 import 'react-table/react-table.css'
-import ProductVariationTable from './ProductVariationTable'
-import EditableTable from './EditableTable';
-import { Button } from 'semantic-ui-react'
+import { Button, Icon } from 'semantic-ui-react'
 import _ from 'lodash'
 
-const ProductTable = () => {
+export class ProductTable extends Component {
+  constructor() {
+    super();
+    this.state = {
+      data: [
+        {
+          sku: 'JT-P',
+          productId: '8830',
+          category: 'Hats',
+          title: 'Lace Bonnet',
+          stock: 10,
+          soldCount: 20,
+          variations: [
+            {
+              sku: 'JT-C1',
+              parentSku: 'JT-P',
+              productId: '8831',
+              category: 'Hats',
+              title: 'Lace Bonnet Small White',
+              stock: 10,
+              soldCount: 20,
+            },
+            {
+              sku: 'JT-C2',
+              parentSku: 'JT-P',
+              productId: '8832',
+              category: 'Hats',
+              title: 'Lace Bonnet Medium White',
+              stock: 10,
+              soldCount: 20,
+            },
+            {
+              sku: 'JT-C3',
+              parentSku: 'JT-P',
+              productId: '8833',
+              category: 'Hats',
+              title: 'Lace Bonnet Small Pink',
+              stock: 10,
+              soldCount: 20,
+            }
+          ]
+        },
+        {
+          sku: 'HT-P',
+          productId: '8840',
+          category: 'Scarves',
+          title: 'Infinity Scarf',
+          stock: 40,
+          soldCount: 159,
+          variations: [
+            {
+              sku: 'HT-C1',
+              parentSku: 'HT-P',
+              productId: '8841',
+              category: 'Scarves',
+              title: 'Infinity Scarf White',
+              stock: 40,
+              soldCount: 159,
+            },
+            {
+              sku: 'HT-C2',
+              parentSku: 'HT-P',
+              productId: '8842',
+              category: 'Scarves',
+              title: 'Infinity Scarf Navy',
+              stock: 40,
+              soldCount: 159,
+            },
+          ]
+        }
+      ]
+    };
+  }
 
-  const columns = [
+
+
+
+  renderEditable = (cellInfo) => {
+    const product = cellInfo.original
+    const column = cellInfo.column.id
+    return (
+      <div
+        style={{ backgroundColor: "#fafafa" }}
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={e => {
+          const data = [...this.state.data];
+          _.forEach(data, (item) => {
+            if (item.sku === product.sku) {
+              item[column] = e.target.innerHTML
+            }
+            if (item.sku === product.parentSku) {
+              _.forEach(item.variations, vItem => {
+                if (vItem.sku === product.sku) {
+                  vItem[column] = e.target.innerHTML
+                }
+              })
+            }
+          })
+          this.setState({ data });
+        }}
+        dangerouslySetInnerHTML={{
+          __html: product[column]
+        }}
+      />
+    );
+  }
+
+
+
+
+
+  columns = [
     {
       Header: 'Basic Info',
       columns: [
         {
+          Header: 'SKU',
+          accessor: 'sku',
+          style: {
+            textAlign: 'left'
+          },
+        },
+        {
           Header: 'Product ID',
           accessor: 'productId',
-          Cell: cellInfo =>
-            <EditableTable
-              cellInfo={cellInfo}
-              editablePid={editablePid} />,
+          style: {
+            textAlign: 'left'
+          },
         },
         {
           Header: 'Category',
           accessor: 'category',
-          Cell: cellInfo =>
-            <EditableTable
-              cellInfo={cellInfo}
-              editablePid={editablePid} />,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
         },
         {
           Header: 'Title',
           accessor: 'title',
-          Cell: cellInfo =>
-            <EditableTable
-              cellInfo={cellInfo}
-              editablePid={editablePid} />,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
         }
       ]
     },
@@ -49,126 +158,113 @@ const ProductTable = () => {
         {
           Header: 'Stock',
           accessor: 'stock',
-          Cell: cellInfo =>
-            <EditableTable
-              cellInfo={cellInfo}
-              editablePid={editablePid} />,
+          style: {
+            textAlign: 'center'
+          },
+          Cell: this.renderEditable,
         },
         {
           Header: 'Sold Count',
           accessor: 'soldCount',
-          Cell: cellInfo =>
-            <EditableTable
-              cellInfo={cellInfo}
-              editablePid={editablePid} />,
+          style: {
+            textAlign: 'center'
+          },
         }
       ]
     },
     {
-      Header: 'Status Change',
-      columns: [
-        {
-          Header: 'Edit',
-          accessor: 'edit',
-          Cell: props =>
-            <Button
-              color="yellow" size="mini"
-              onClick={() => handleEditClick(props)}>
-              Edit
-            </Button>
-        },
-        {
-          Header: 'Delete',
-          accessor: 'delete',
-          Cell: props => <Button color="red" size="mini">Delete</Button>
-        }
-      ]
+      Header: 'Actions',
+      accessor: 'edit',
+      style: {
+        textAlign: 'center'
+      },
+      Cell: props =>
+        <Button
+          color="red" size="mini"
+          onClick={() => this.handleDeleteClick(props)}>
+          DELETE
+        </Button>
     }
   ]
 
-  const [data, setData] = useState([
-    {
-      productId: '8830',
-      category: 'Hats',
-      title: 'Lace Bonnet',
-      stock: 10,
-      soldCount: 20,
-      variations: [
-        {
-          productId: '8831',
-          title: 'Lace Bonnet Small White'
-        },
-        {
-          productId: '8832',
-          title: 'Lace Bonnet Medium White'
-        },
-        {
-          productId: '8833',
-          title: 'Lace Bonnet Small Pink'
-        }
-      ]
-    },
-    {
-      productId: '8840',
-      category: 'Scarves',
-      title: 'Infinity Scarf',
-      stock: 40,
-      soldCount: 159,
-      variations: [
-        {
-          productId: '8841',
-          title: 'Infinity Scarf White'
-        },
-        {
-          productId: '8842',
-          title: 'Infinity Scarf Navy'
-        },
-        {
-          productId: '8843',
-          title: 'Infinity Scarf Pink'
-        }
-      ]
-    }
-  ])
 
-  const [editablePid, setEditablePid] = useState(0)
-  const handleEditClick = (props) => {
-    setEditablePid(props.original.productId)
+
+
+
+
+  handleDeleteClick = (props) => {
+    const parentSku = props.original.parentSku
+    const sku = props.original.sku
+    const data = this.state.data
+    let newData = []
+
+    // when deleting parent product
+    if (!parentSku) {
+      newData = _.filter(data, product =>
+        product.sku !== sku)
+    }
+    // when deleting child product
+    else {
+      newData = _.map(data, product => {
+        if (product.sku === parentSku) {
+          const newVariations = _.filter(product.variations, vItem => vItem.sku !== sku)
+          return {
+            ...product,
+            variations: newVariations
+          }
+        } else {
+          return product
+        }
+      })
+    }
+    this.setState({ data: newData })
   }
 
-  console.log(editablePid)
 
-  return (
-    <ReactTable
-      data={data}
-      columns={columns}
-      defaultPageSize={10}
-      className="-striped -highlight"
-      // getTdProps={(state, rowInfo, column, instance) => {
-      //   return {
-      //     onMouseEnter: e =>
-      //       console.log("Cell - onMouseEnter", {
-      //         state,
-      //         rowInfo,
-      //         column,
-      //         instance,
-      //         event: e
-      //       })
-      //   };
-      // }}
-      SubComponent={row => {
-        console.log(row)
-        return (
-          <div style={{ padding: '20px' }}>
-            <ProductVariationTable
-              data={data}
-              parent={row.original}
-            />
-          </div>
-        )
-      }}
-    />
-  )
+
+
+  render() {
+    const { data } = this.state;
+    return (
+      <div>
+        <ReactTable
+          data={data}
+          columns={this.columns}
+          defaultPageSize={10}
+          className="-striped -highlight"
+          minRows={5}
+          filterable
+          collapseOnDataChange={false}
+          ExpanderComponent={row => {
+            if (!row.original.variations.length) {
+              return <div></div>
+            } else {
+              return (typeof row.isExpanded === 'undefined' || row.isExpanded === false)
+                ? <Icon name="angle right" />
+                : <Icon name="angle down" />
+            }
+          }}
+          SubComponent={row => {
+            if (!row.original.variations.length) {
+              return null
+            }
+            return (
+              <div style={{ padding: '20px' }}>
+                <ReactTable
+                  data={_.find(this.state.data, { 'productId': row.original.productId }).variations}
+                  columns={this.columns}
+                  minRows={5}
+                  defaultPageSize={10}
+                  noDataText={"No variations"}
+                  showPagination={false}
+                />
+              </div>
+            )
+          }}
+        />
+      </div>
+    );
+  }
 }
 
 export default ProductTable
