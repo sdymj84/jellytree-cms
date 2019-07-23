@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "jellytree-3cb33"
+  },
+  "targets": {
+    "jellytree-3cb33": {
+      "hosting": {
+        "cms": [
+          "jellytreecms"
+        ]
+      }
+    }
+  }
+}

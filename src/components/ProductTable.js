@@ -9,15 +9,48 @@ import uuidv1 from 'uuid/v1'
 
 const BULLET_WIDTH = 200
 const TITLE_WIDTH = 500
+const styles = {
+  basic: {
+    textAlign: 'left',
+  },
+  center: {
+    textAlign: 'center',
+  }
+}
 
 const Container = styled.div`
   text-align: right;
 `
 const StyledButton = styled(Button)`
   &&& {
-    margin: 1em;
+    margin: 1em 2em 1em 0;
   }
 `
+const BasicInfo = styled.div`
+  background-color: #eab9b9;
+  box-shadow: 0 0 5px 5px #eab9b9;
+`
+const BulletPoints = styled.div`
+  background-color: #b2e8b8;
+  box-shadow: 0 0 5px 5px #b2e8b8;
+`
+const Inventory = styled.div`
+  background-color: #b2c4ea;
+  box-shadow: 0 0 5px 5px #b2c4ea;
+`
+const Images = styled.div`
+  background-color: #e2e2a3;
+  box-shadow: 0 0 5px 5px #e2e2a3;
+`
+const Actions = styled.div`
+  background-color: #e8c4a2;
+  box-shadow: 0 0 5px 5px #e8c4a2;
+`
+
+
+
+
+
 export class ProductTable extends Component {
   state = {
     data: []
@@ -67,7 +100,13 @@ export class ProductTable extends Component {
     const column = cellInfo.column.id
     return (
       <div
-        style={{ backgroundColor: "#fafafa" }}
+        style={{
+          backgroundColor: "#fafafa",
+          height: '100%',
+          padding: '2px',
+          border: '1px solid #439e92',
+          borderRadius: '3px',
+        }}
         contentEditable
         suppressContentEditableWarning
         onBlur={e => {
@@ -99,119 +138,95 @@ export class ProductTable extends Component {
 
   columns = [
     {
-      Header: 'Basic Info',
+      Header: <BasicInfo>Basic Info</BasicInfo>,
       columns: [
         {
           Header: 'SKU',
           accessor: 'sku',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID',
           accessor: 'pid',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Category',
           accessor: 'category',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Title',
           accessor: 'title',
           minWidth: TITLE_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color Map',
           accessor: 'colorMap',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size Map',
           accessor: 'sizeMap',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Bullet Points',
+      Header: <BulletPoints>Bullet Points</BulletPoints>,
       columns: [
         {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Inventory',
+      Header: <Inventory>Inventory</Inventory>,
       columns: [
         {
           Header: 'Stock',
@@ -232,33 +247,42 @@ export class ProductTable extends Component {
         {
           Header: 'MIN Price',
           accessor: 'minPrice',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'MAX Price',
           accessor: 'maxPrice',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Actions',
-      accessor: 'edit',
-      style: {
-        textAlign: 'center'
-      },
-      Cell: props =>
-        <Button
-          color="red" size="mini"
-          onClick={() => this.handleDeleteClick(props)}>
-          DELETE
-        </Button>
+      Header: <Actions>Actions</Actions>,
+      columns: [
+        {
+          Header: 'Actions',
+          accessor: 'actions',
+          minWidth: 200,
+          style: {
+            textAlign: 'center'
+          },
+          Cell: props =>
+            <div>
+              <Button
+                color="blue" size="mini"
+                onClick={() => this.handleAddVarClick(props)}>
+                ADD VAR
+              </Button>
+              <Button
+                color="red" size="mini"
+                onClick={() => this.handleDeleteClick(props)}>
+                DELETE
+              </Button>
+            </div>
+        }
+      ]
     }
   ]
 
@@ -270,134 +294,107 @@ export class ProductTable extends Component {
 
   variationColumns = [
     {
-      Header: 'Basic Info',
+      Header: <BasicInfo>Basic Info</BasicInfo>,
       columns: [
         {
           Header: 'SKU',
           accessor: 'sku',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID',
           accessor: 'pid',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Title',
           accessor: 'title',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
+          minWidth: TITLE_WIDTH,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color',
           accessor: 'color',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color Map',
           accessor: 'colorMap',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size',
           accessor: 'size',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size Map',
           accessor: 'sizeMap',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Material',
           accessor: 'material',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Bullet Points',
+      Header: <BulletPoints>Bullet Points</BulletPoints>,
       columns: [
         {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Inventory',
+      Header: <Inventory>Inventory</Inventory>,
       columns: [
         {
           Header: 'Stock',
@@ -418,106 +415,128 @@ export class ProductTable extends Component {
         {
           Header: 'Price',
           accessor: 'price',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Images',
+      Header: <Images>Images</Images>,
       columns: [
         {
           Header: 'Thumbnail',
           accessor: 'thumbnail',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Main Image',
           accessor: 'mainImage',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image1',
           accessor: 'image1',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image2',
           accessor: 'image2',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image3',
           accessor: 'image3',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image4',
           accessor: 'image4',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image5',
           accessor: 'image5',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image6',
           accessor: 'image6',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image7',
           accessor: 'image7',
-          style: {
-            textAlign: 'left'
-          },
+          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
     },
     {
-      Header: 'Actions',
-      accessor: 'edit',
-      style: {
-        textAlign: 'center'
-      },
-      Cell: props =>
-        <Button
-          color="red" size="mini"
-          onClick={() => this.handleDeleteClick(props)}>
-          DELETE
-        </Button>
+      Header: <Actions>Actions</Actions>,
+      columns: [
+        {
+          Header: 'Actions',
+          accessor: 'actions',
+          style: {
+            textAlign: 'center'
+          },
+          Cell: props =>
+            <Button
+              color="red" size="mini"
+              onClick={() => this.handleDeleteClick(props)}>
+              DELETE
+            </Button>
+        }
+      ]
     }
   ]
 
 
+  handleAddVarClick = (props) => {
+    const { id } = props.original
+    this.setState(prevState => ({
+      data: _.map(prevState.data, product => {
+        if (product.id === id) {
+          const newProduct = {
+            ...product,
+            variations: [
+              ...product.variations,
+              {
+                sku: '',
+                parentSku: props.original.sku,
+                pid: '',
+                pidType: '',
+                title: '',
+                color: '',
+                colorMap: [],
+                size: '',
+                sizeMap: [],
+                material: [],
+                bulletPoints: [],
+                stock: 0,
+                soldCount: 0,
+                price: '',
+                thumbnail: '',
+                mainImage: '',
+                images: [],
+              },
+            ]
+          }
+          return newProduct
+        } else {
+          return product
+        }
+      })
+    }))
+  }
 
   handleSaveClick = async () => {
     try {
@@ -623,7 +642,7 @@ export class ProductTable extends Component {
                 <ReactTable
                   data={_.find(this.state.data, { 'pid': row.original.pid }).variations}
                   columns={this.variationColumns}
-                  minRows={5}
+                  minRows={10}
                   defaultPageSize={10}
                   noDataText={"No variations"}
                   showPagination={false}
