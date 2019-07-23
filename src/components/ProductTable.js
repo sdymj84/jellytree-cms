@@ -5,6 +5,7 @@ import { Button, Icon } from 'semantic-ui-react'
 import _ from 'lodash'
 import styled from 'styled-components'
 import axios from 'axios'
+import uuidv1 from 'uuid/v1'
 
 const BULLET_WIDTH = 200
 const TITLE_WIDTH = 500
@@ -72,7 +73,7 @@ export class ProductTable extends Component {
         onBlur={e => {
           const data = [...this.state.data];
           _.forEach(data, (item) => {
-            if (item.sku === product.sku) {
+            if (item.id === product.id) {
               item[column] = e.target.innerHTML
             }
             if (item.sku === product.parentSku) {
@@ -520,11 +521,9 @@ export class ProductTable extends Component {
 
   handleSaveClick = async () => {
     try {
-      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', {
-        ...this.state.data,
-        // TODO: You store array in array - fix it
-        id: 'new-data',
-      })
+      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts',
+        this.state.data
+      )
       console.log(res)
     } catch (e) {
       console.log(e.response)
@@ -534,12 +533,19 @@ export class ProductTable extends Component {
   handleNewClick = () => {
     this.setState(prevState => ({
       data: [{
+        id: uuidv1(),
         sku: '',
         pid: '',
+        pidType: '',
         category: '',
         title: '',
+        colorMap: [],
+        sizeMap: [],
+        bulletPoints: [],
         stock: 0,
         soldCount: 0,
+        minPrice: 0,
+        maxPrice: 0,
         variations: [],
       }, ...prevState.data]
     }))
