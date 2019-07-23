@@ -3,81 +3,61 @@ import ReactTable from 'react-table'
 import 'react-table/react-table.css'
 import { Button, Icon } from 'semantic-ui-react'
 import _ from 'lodash'
+import styled from 'styled-components'
+import axios from 'axios'
 
+const BULLET_WIDTH = 200
+const TITLE_WIDTH = 500
+
+const Container = styled.div`
+  text-align: right;
+`
+const StyledButton = styled(Button)`
+  &&& {
+    margin: 1em;
+  }
+`
 export class ProductTable extends Component {
-  constructor() {
-    super();
-    this.state = {
-      data: [
-        {
-          sku: 'JT-P',
-          productId: '8830',
-          category: 'Hats',
-          title: 'Lace Bonnet',
-          stock: 10,
-          soldCount: 20,
-          variations: [
-            {
-              sku: 'JT-C1',
-              parentSku: 'JT-P',
-              productId: '8831',
-              category: 'Hats',
-              title: 'Lace Bonnet Small White',
-              stock: 10,
-              soldCount: 20,
-            },
-            {
-              sku: 'JT-C2',
-              parentSku: 'JT-P',
-              productId: '8832',
-              category: 'Hats',
-              title: 'Lace Bonnet Medium White',
-              stock: 10,
-              soldCount: 20,
-            },
-            {
-              sku: 'JT-C3',
-              parentSku: 'JT-P',
-              productId: '8833',
-              category: 'Hats',
-              title: 'Lace Bonnet Small Pink',
-              stock: 10,
-              soldCount: 20,
-            }
-          ]
-        },
-        {
-          sku: 'HT-P',
-          productId: '8840',
-          category: 'Scarves',
-          title: 'Infinity Scarf',
-          stock: 40,
-          soldCount: 159,
-          variations: [
-            {
-              sku: 'HT-C1',
-              parentSku: 'HT-P',
-              productId: '8841',
-              category: 'Scarves',
-              title: 'Infinity Scarf White',
-              stock: 40,
-              soldCount: 159,
-            },
-            {
-              sku: 'HT-C2',
-              parentSku: 'HT-P',
-              productId: '8842',
-              category: 'Scarves',
-              title: 'Infinity Scarf Navy',
-              stock: 40,
-              soldCount: 159,
-            },
-          ]
-        }
-      ]
-    };
+  state = {
+    data: []
   }
 
+  async componentDidMount() {
+    try {
+      const res = await axios.get('https://us-central1-jellytree-3cb33.cloudfunctions.net/listProducts')
+      console.log(res.data)
+      const data = _.map(res.data, product => {
+        const variations = _.map(product.variations, variation => ({
+          ...variation,
+          bulletPoints1: variation.bulletPoints[0],
+          bulletPoints2: variation.bulletPoints[1],
+          bulletPoints3: variation.bulletPoints[2],
+          bulletPoints4: variation.bulletPoints[3],
+          bulletPoints5: variation.bulletPoints[4],
+          image1: variation.images[0],
+          image2: variation.images[1],
+          image3: variation.images[2],
+          image4: variation.images[3],
+          image5: variation.images[4],
+          image6: variation.images[5],
+          image7: variation.images[6],
+        }))
+        return {
+          ...product,
+          bulletPoints1: product.bulletPoints[0],
+          bulletPoints2: product.bulletPoints[1],
+          bulletPoints3: product.bulletPoints[2],
+          bulletPoints4: product.bulletPoints[3],
+          bulletPoints5: product.bulletPoints[4],
+          variations,
+        }
+      })
+
+      this.setState({ data })
+    } catch (e) {
+      console.log("Error getting products data", e)
+    }
+  }
 
 
 
@@ -126,13 +106,23 @@ export class ProductTable extends Component {
           style: {
             textAlign: 'left'
           },
+          Cell: this.renderEditable,
         },
         {
           Header: 'Product ID',
-          accessor: 'productId',
+          accessor: 'pid',
           style: {
             textAlign: 'left'
           },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Product ID Type',
+          accessor: 'pidType',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
         },
         {
           Header: 'Category',
@@ -145,11 +135,78 @@ export class ProductTable extends Component {
         {
           Header: 'Title',
           accessor: 'title',
+          minWidth: TITLE_WIDTH,
           style: {
             textAlign: 'left'
           },
           Cell: this.renderEditable,
-        }
+        },
+        {
+          Header: 'Color Map',
+          accessor: 'colorMap',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Size Map',
+          accessor: 'sizeMap',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+      ]
+    },
+    {
+      Header: 'Bullet Points',
+      columns: [
+        {
+          Header: 'Bullet 1',
+          accessor: 'bulletPoints1',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 2',
+          accessor: 'bulletPoints2',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 3',
+          accessor: 'bulletPoints3',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 4',
+          accessor: 'bulletPoints4',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 5',
+          accessor: 'bulletPoints5',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
       ]
     },
     {
@@ -169,7 +226,24 @@ export class ProductTable extends Component {
           style: {
             textAlign: 'center'
           },
-        }
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'MIN Price',
+          accessor: 'minPrice',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'MAX Price',
+          accessor: 'maxPrice',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
       ]
     },
     {
@@ -191,6 +265,285 @@ export class ProductTable extends Component {
 
 
 
+
+
+  variationColumns = [
+    {
+      Header: 'Basic Info',
+      columns: [
+        {
+          Header: 'SKU',
+          accessor: 'sku',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Product ID',
+          accessor: 'pid',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Product ID Type',
+          accessor: 'pidType',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Title',
+          accessor: 'title',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Color',
+          accessor: 'color',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Color Map',
+          accessor: 'colorMap',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Size',
+          accessor: 'size',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Size Map',
+          accessor: 'sizeMap',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Material',
+          accessor: 'material',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+      ]
+    },
+    {
+      Header: 'Bullet Points',
+      columns: [
+        {
+          Header: 'Bullet 1',
+          accessor: 'bulletPoints1',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 2',
+          accessor: 'bulletPoints2',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 3',
+          accessor: 'bulletPoints3',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 4',
+          accessor: 'bulletPoints4',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Bullet 5',
+          accessor: 'bulletPoints5',
+          minWidth: BULLET_WIDTH,
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+      ]
+    },
+    {
+      Header: 'Inventory',
+      columns: [
+        {
+          Header: 'Stock',
+          accessor: 'stock',
+          style: {
+            textAlign: 'center'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Sold Count',
+          accessor: 'soldCount',
+          style: {
+            textAlign: 'center'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Price',
+          accessor: 'price',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+      ]
+    },
+    {
+      Header: 'Images',
+      columns: [
+        {
+          Header: 'Thumbnail',
+          accessor: 'thumbnail',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Main Image',
+          accessor: 'mainImage',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image1',
+          accessor: 'image1',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image2',
+          accessor: 'image2',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image3',
+          accessor: 'image3',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image4',
+          accessor: 'image4',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image5',
+          accessor: 'image5',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image6',
+          accessor: 'image6',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+        {
+          Header: 'Image7',
+          accessor: 'image7',
+          style: {
+            textAlign: 'left'
+          },
+          Cell: this.renderEditable,
+        },
+      ]
+    },
+    {
+      Header: 'Actions',
+      accessor: 'edit',
+      style: {
+        textAlign: 'center'
+      },
+      Cell: props =>
+        <Button
+          color="red" size="mini"
+          onClick={() => this.handleDeleteClick(props)}>
+          DELETE
+        </Button>
+    }
+  ]
+
+
+
+  handleSaveClick = async () => {
+    try {
+      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', {
+        ...this.state.data,
+        // TODO: You store array in array - fix it
+        id: 'new-data',
+      })
+      console.log(res)
+    } catch (e) {
+      console.log(e.response)
+    }
+  }
+
+  handleNewClick = () => {
+    this.setState(prevState => ({
+      data: [{
+        sku: '',
+        pid: '',
+        category: '',
+        title: '',
+        stock: 0,
+        soldCount: 0,
+        variations: [],
+      }, ...prevState.data]
+    }))
+  }
 
   handleDeleteClick = (props) => {
     const parentSku = props.original.parentSku
@@ -225,8 +578,19 @@ export class ProductTable extends Component {
 
   render() {
     const { data } = this.state;
+    console.log(data)
     return (
-      <div>
+      <Container>
+        <StyledButton
+          color="blue"
+          onClick={this.handleNewClick}>
+          NEW
+        </StyledButton>
+        <StyledButton
+          color="green"
+          onClick={this.handleSaveClick}>
+          SAVE
+        </StyledButton>
         <ReactTable
           data={data}
           columns={this.columns}
@@ -251,8 +615,8 @@ export class ProductTable extends Component {
             return (
               <div style={{ padding: '20px' }}>
                 <ReactTable
-                  data={_.find(this.state.data, { 'productId': row.original.productId }).variations}
-                  columns={this.columns}
+                  data={_.find(this.state.data, { 'pid': row.original.pid }).variations}
+                  columns={this.variationColumns}
                   minRows={5}
                   defaultPageSize={10}
                   noDataText={"No variations"}
@@ -262,7 +626,7 @@ export class ProductTable extends Component {
             )
           }}
         />
-      </div>
+      </Container>
     );
   }
 }
