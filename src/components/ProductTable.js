@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import ReactTable from 'react-table'
 import 'react-table/react-table.css'
-import { Button, Icon } from 'semantic-ui-react'
+import { Button, Icon, Modal, Header, Loader } from 'semantic-ui-react'
 import _ from 'lodash'
 import styled from 'styled-components'
 import axios from 'axios'
@@ -9,17 +9,15 @@ import uuidv1 from 'uuid/v1'
 
 const BULLET_WIDTH = 200
 const TITLE_WIDTH = 500
-const styles = {
-  basic: {
-    textAlign: 'left',
-  },
-  center: {
-    textAlign: 'center',
-  }
-}
 
 const Container = styled.div`
   text-align: right;
+  .rt-td {
+    padding: 4px 5px;
+    text-align: left;
+    border-radius: 3px;
+    font-size: 1.1em;
+  }
 `
 const StyledButton = styled(Button)`
   &&& {
@@ -53,6 +51,9 @@ const Actions = styled.div`
 
 export class ProductTable extends Component {
   state = {
+    modalOpen: false,
+    isSaving: false,
+    saveResultMsg: "",
     data: []
   }
 
@@ -102,10 +103,9 @@ export class ProductTable extends Component {
       <div
         style={{
           backgroundColor: "#fafafa",
+          outline: 'none',
           height: '100%',
-          padding: '2px',
-          border: '1px solid #439e92',
-          borderRadius: '3px',
+          paddingTop: '3px',
         }}
         contentEditable
         suppressContentEditableWarning
@@ -143,44 +143,37 @@ export class ProductTable extends Component {
         {
           Header: 'SKU',
           accessor: 'sku',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID',
           accessor: 'pid',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Category',
           accessor: 'category',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Title',
           accessor: 'title',
           minWidth: TITLE_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color Map',
           accessor: 'colorMap',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size Map',
           accessor: 'sizeMap',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -192,35 +185,30 @@ export class ProductTable extends Component {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -231,29 +219,21 @@ export class ProductTable extends Component {
         {
           Header: 'Stock',
           accessor: 'stock',
-          style: {
-            textAlign: 'center'
-          },
           Cell: this.renderEditable,
         },
         {
           Header: 'Sold Count',
           accessor: 'soldCount',
-          style: {
-            textAlign: 'center'
-          },
           Cell: this.renderEditable,
         },
         {
           Header: 'MIN Price',
           accessor: 'minPrice',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'MAX Price',
           accessor: 'maxPrice',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -299,56 +279,47 @@ export class ProductTable extends Component {
         {
           Header: 'SKU',
           accessor: 'sku',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID',
           accessor: 'pid',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Title',
           accessor: 'title',
-          style: styles.basic,
           minWidth: TITLE_WIDTH,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color',
           accessor: 'color',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Color Map',
           accessor: 'colorMap',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size',
           accessor: 'size',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Size Map',
           accessor: 'sizeMap',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Material',
           accessor: 'material',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -360,35 +331,30 @@ export class ProductTable extends Component {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -399,23 +365,16 @@ export class ProductTable extends Component {
         {
           Header: 'Stock',
           accessor: 'stock',
-          style: {
-            textAlign: 'center'
-          },
           Cell: this.renderEditable,
         },
         {
           Header: 'Sold Count',
           accessor: 'soldCount',
-          style: {
-            textAlign: 'center'
-          },
           Cell: this.renderEditable,
         },
         {
           Header: 'Price',
           accessor: 'price',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -426,55 +385,46 @@ export class ProductTable extends Component {
         {
           Header: 'Thumbnail',
           accessor: 'thumbnail',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Main Image',
           accessor: 'mainImage',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image1',
           accessor: 'image1',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image2',
           accessor: 'image2',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image3',
           accessor: 'image3',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image4',
           accessor: 'image4',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image5',
           accessor: 'image5',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image6',
           accessor: 'image6',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
         {
           Header: 'Image7',
           accessor: 'image7',
-          style: styles.basic,
           Cell: this.renderEditable,
         },
       ]
@@ -539,13 +489,25 @@ export class ProductTable extends Component {
   }
 
   handleSaveClick = async () => {
+    this.setState({
+      modalOpen: true,
+      isSaving: true,
+    })
     try {
       const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts',
         this.state.data
       )
       console.log(res)
+      this.setState({
+        isSaving: false,
+        saveResultMsg: "Successfully Saved!"
+      })
     } catch (e) {
       console.log(e.response)
+      this.setState({
+        isSaving: false,
+        saveResultMsg: "Something went wrong, please try again later."
+      })
     }
   }
 
@@ -598,12 +560,13 @@ export class ProductTable extends Component {
     this.setState({ data: newData })
   }
 
-
+  handleModalClose = () => {
+    this.setState({ modalOpen: false })
+  }
 
 
   render() {
     const { data } = this.state;
-    console.log(data)
     return (
       <Container>
         <StyledButton
@@ -623,6 +586,16 @@ export class ProductTable extends Component {
           className="-striped -highlight"
           minRows={5}
           filterable
+          getTdProps={(state, rowInfo) => {
+            return {
+              style: {
+                border: rowInfo
+                  ? '1px solid #439e92'
+                  : 'none',
+                borderRadius: '3px',
+              }
+            }
+          }}
           collapseOnDataChange={false}
           ExpanderComponent={row => {
             if (!row.original.variations.length) {
@@ -646,11 +619,45 @@ export class ProductTable extends Component {
                   defaultPageSize={10}
                   noDataText={"No variations"}
                   showPagination={false}
+                  getTdProps={(state, rowInfo) => {
+                    return {
+                      style: {
+                        border: rowInfo
+                          ? '1px solid #439e92'
+                          : 'none',
+                        borderRadius: '3px',
+                      }
+                    }
+                  }}
                 />
               </div>
             )
           }}
         />
+
+
+        <Modal
+          open={this.state.modalOpen}
+          onClose={!this.state.isSaving ? this.handleModalClose : null}
+          basic
+          size='mini'
+        >
+          {this.state.isSaving
+            ? <Loader size='massive'>Saving...</Loader>
+            : <Fragment>
+              <Header
+                size="huge"
+                icon='save outline'
+                content={this.state.saveResultMsg} />
+
+              <Modal.Actions>
+                <Button color='green' onClick={this.handleModalClose} inverted>
+                  <Icon name='checkmark' /> Got it
+                </Button>
+              </Modal.Actions>
+            </Fragment>}
+
+        </Modal>
       </Container>
     );
   }
