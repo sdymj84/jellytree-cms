@@ -28,7 +28,7 @@ export class ProductTable extends Component {
   state = {
     modalOpen: false,
     isSaving: false,
-    saveResultMsg: "",
+    saveResultMsg: [],
     isResultError: false,
     data: [],
     deletedDocIds: [],
@@ -118,14 +118,40 @@ export class ProductTable extends Component {
   }
 
 
-  validateData = () => {
-
+  validateData = (data) => {
+    this.setState({
+      modalOpen: true,
+    })
+    try {
+      const errorMessages = []
+      data.forEach(product => {
+        if (product.sku.trim() === "") {
+          errorMessages.push("SKU is required for parent products")
+        }
+        if (product.category.trim() === "") {
+          errorMessages.push("Category is required")
+        }
+        if (product.title.trim() === "") {
+          errorMessages.push("Title is required")
+        }
+      })
+      if (errorMessages.length) {
+        throw new Error(errorMessages)
+      }
+      return true
+    } catch (e) {
+      console.log('Warning on front end')
+      this.showError(e)
+      return false
+    }
   }
 
   showError = (e) => {
-    const errorMsg = e.response
+    let errorMsg = e.response
       ? e.response.data.message
       : e.message
+    errorMsg = errorMsg.split(',')
+
     this.setState({
       modalOpen: true,
       isSaving: false,
@@ -136,65 +162,57 @@ export class ProductTable extends Component {
 
 
   handleAddVarClick = (props) => {
-    try {
-      this.state.data.forEach(product => {
-        if (product.sku.trim() === "") {
-          throw new Error("Please enter parent SKU to add variations.")
+    const { id, sku } = props.original
+
+    if (sku === "") {
+      this.showError(new Error("Please enter SKU to create variations"))
+      return
+    }
+
+    this.setState(prevState => ({
+      data: _.map(prevState.data, product => {
+        if (product.id === id) {
+          const newProduct = {
+            ...product,
+            variations: [
+              ...product.variations,
+              {
+                sku: '',
+                parentSku: props.original.sku,
+                pid: '',
+                pidType: '',
+                title: '',
+                color: '',
+                colorMap: [],
+                size: '',
+                sizeMap: [],
+                material: [],
+                bulletPoints: [],
+                stock: 0,
+                soldCount: 0,
+                price: '',
+                thumbnail: '',
+                mainImage: '',
+                images: [],
+              },
+            ]
+          }
+          return newProduct
+        } else {
+          return product
         }
       })
-
-      const { id } = props.original
-      this.setState(prevState => ({
-        data: _.map(prevState.data, product => {
-          if (product.id === id) {
-            const newProduct = {
-              ...product,
-              variations: [
-                ...product.variations,
-                {
-                  sku: '',
-                  parentSku: props.original.sku,
-                  pid: '',
-                  pidType: '',
-                  title: '',
-                  color: '',
-                  colorMap: [],
-                  size: '',
-                  sizeMap: [],
-                  material: [],
-                  bulletPoints: [],
-                  stock: 0,
-                  soldCount: 0,
-                  price: '',
-                  thumbnail: '',
-                  mainImage: '',
-                  images: [],
-                },
-              ]
-            }
-            return newProduct
-          } else {
-            return product
-          }
-        })
-      }))
-    } catch (e) {
-      this.showError(e)
-    }
+    }))
   }
 
   handleSaveClick = async () => {
     const data = this.state.data
-    this.setState({
-      modalOpen: true,
-      isSaving: true,
-    })
+    this.setState({ isSaving: true })
+    if (!this.validateData(data)) {
+      return
+    }
+
     try {
-      data.forEach(product => {
-        if (product.sku.trim() === "") {
-          throw new Error("SKU cannot be empty")
-        }
-      })
       data.forEach(product => {
         product.bulletPoints = [
           product.bulletPoints1,
@@ -369,10 +387,18 @@ export class ProductTable extends Component {
           {this.state.isSaving
             ? <Loader size='massive'>Saving...</Loader>
             : <Fragment>
-              <Header
-                size="huge"
-                icon={this.state.isResultError ? "warning sign" : "save outline"}
-                content={this.state.saveResultMsg} />
+              {(this.state.saveResultMsg.constructor === Array)
+                ? this.state.saveResultMsg.map((msg, i) =>
+                  <Header
+                    key={i}
+                    size="huge"
+                    icon={this.state.isResultError ? "warning sign" : "save outline"}
+                    content={msg} />
+                )
+                : <Header
+                  size="huge"
+                  icon={this.state.isResultError ? "warning sign" : "save outline"}
+                  content={this.state.saveResultMsg} />}
               <Modal.Actions>
                 <Button color='green' onClick={this.handleModalClose} inverted>
                   <Icon name='checkmark' /> Got it

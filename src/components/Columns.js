@@ -26,7 +26,16 @@ const Actions = styled.div`
   box-shadow: 0 0 5px 5px #e8c4a2;
 `
 
-
+const Required = (props) => {
+  return (
+    <span>
+      {props.title}
+      <span style={{ color: 'red' }}>
+        {' '}*
+      </span>
+    </span>
+  )
+}
 
 
 const Columns = (props) => {
@@ -41,7 +50,7 @@ const Columns = (props) => {
       Header: <BasicInfo>Basic Info</BasicInfo>,
       columns: [
         {
-          Header: 'SKU',
+          Header: <Required title="SKU" />,
           accessor: 'sku',
           Cell: props.renderEditable,
         },
@@ -53,15 +62,16 @@ const Columns = (props) => {
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
+          minWidth: 125,
           Cell: props.renderEditable,
         },
         {
-          Header: 'Category',
+          Header: <Required title="Category" />,
           accessor: 'category',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Title',
+          Header: <Required title="Title" />,
           accessor: 'title',
           minWidth: TITLE_WIDTH,
           Cell: props.renderEditable,
@@ -177,48 +187,49 @@ const Columns = (props) => {
       Header: <BasicInfo>Basic Info</BasicInfo>,
       columns: [
         {
-          Header: 'SKU',
+          Header: <Required title="SKU" />,
           accessor: 'sku',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Product ID',
+          Header: <Required title="Product ID" />,
           accessor: 'pid',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Product ID Type',
+          Header: <Required title="Product ID Type" />,
           accessor: 'pidType',
+          minWidth: 125,
           Cell: props.renderEditable,
         },
         {
-          Header: 'Title',
+          Header: <Required title="Title" />,
           accessor: 'title',
           minWidth: TITLE_WIDTH,
           Cell: props.renderEditable,
         },
         {
-          Header: 'Color',
+          Header: <Required title="Color" />,
           accessor: 'color',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Color Map',
+          Header: <Required title="Color Map" />,
           accessor: 'colorMap',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Size',
+          Header: <Required title="Size" />,
           accessor: 'size',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Size Map',
+          Header: <Required title="Size Map" />,
           accessor: 'sizeMap',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Material',
+          Header: <Required title="Material" />,
           accessor: 'material',
           Cell: props.renderEditable,
         },
@@ -283,12 +294,12 @@ const Columns = (props) => {
       Header: <Images>Images</Images>,
       columns: [
         {
-          Header: 'Thumbnail',
+          Header: <Required title="Thumbnail" />,
           accessor: 'thumbnail',
           Cell: props.renderEditable,
         },
         {
-          Header: 'Main Image',
+          Header: <Required title="Main Image" />,
           accessor: 'mainImage',
           Cell: props.renderEditable,
         },
