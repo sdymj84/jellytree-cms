@@ -54,7 +54,9 @@ export class ProductTable extends Component {
     modalOpen: false,
     isSaving: false,
     saveResultMsg: "",
-    data: []
+    isResultError: false,
+    data: [],
+    deletedDocIds: [],
   }
 
   async componentDidMount() {
@@ -102,7 +104,6 @@ export class ProductTable extends Component {
     return (
       <div
         style={{
-          backgroundColor: "#fafafa",
           outline: 'none',
           height: '100%',
           paddingTop: '3px',
@@ -113,12 +114,12 @@ export class ProductTable extends Component {
           const data = [...this.state.data];
           _.forEach(data, (item) => {
             if (item.id === product.id) {
-              item[column] = e.target.innerHTML
+              item[column] = e.target.innerText
             }
             if (item.sku === product.parentSku) {
               _.forEach(item.variations, vItem => {
                 if (vItem.sku === product.sku) {
-                  vItem[column] = e.target.innerHTML
+                  vItem[column] = e.target.innerText
                 }
               })
             }
@@ -450,63 +451,98 @@ export class ProductTable extends Component {
   ]
 
 
+  validateData = () => {
+
+  }
+
+
   handleAddVarClick = (props) => {
-    const { id } = props.original
-    this.setState(prevState => ({
-      data: _.map(prevState.data, product => {
-        if (product.id === id) {
-          const newProduct = {
-            ...product,
-            variations: [
-              ...product.variations,
-              {
-                sku: '',
-                parentSku: props.original.sku,
-                pid: '',
-                pidType: '',
-                title: '',
-                color: '',
-                colorMap: [],
-                size: '',
-                sizeMap: [],
-                material: [],
-                bulletPoints: [],
-                stock: 0,
-                soldCount: 0,
-                price: '',
-                thumbnail: '',
-                mainImage: '',
-                images: [],
-              },
-            ]
-          }
-          return newProduct
-        } else {
-          return product
+    try {
+      this.state.data.forEach(product => {
+        if (product.sku.trim() === "") {
+          // TODO: fix here - make catch block
+          this.setState({
+            modalOpen: true,
+            isResultError: true,
+            saveResultMsg: "Please enter parent SKU to add variations."
+          })
         }
       })
-    }))
+
+      const { id } = props.original
+      this.setState(prevState => ({
+        data: _.map(prevState.data, product => {
+          if (product.id === id) {
+            const newProduct = {
+              ...product,
+              variations: [
+                ...product.variations,
+                {
+                  sku: '',
+                  parentSku: props.original.sku,
+                  pid: '',
+                  pidType: '',
+                  title: '',
+                  color: '',
+                  colorMap: [],
+                  size: '',
+                  sizeMap: [],
+                  material: [],
+                  bulletPoints: [],
+                  stock: 0,
+                  soldCount: 0,
+                  price: '',
+                  thumbnail: '',
+                  mainImage: '',
+                  images: [],
+                },
+              ]
+            }
+            return newProduct
+          } else {
+            return product
+          }
+        })
+      }))
+    } catch (e) {
+
+    }
   }
 
   handleSaveClick = async () => {
+    const data = this.state.data
     this.setState({
       modalOpen: true,
       isSaving: true,
     })
     try {
-      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts',
-        this.state.data
-      )
+      data.forEach(product => {
+        if (product.sku.trim() === "") {
+          throw new Error("SKU cannot be empty")
+        }
+      })
+      await data.forEach(product => {
+        product.bulletPoints = [
+          product.bulletPoints1,
+          product.bulletPoints2,
+          product.bulletPoints3,
+          product.bulletPoints4,
+          product.bulletPoints5,
+        ]
+      })
+      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', data)
       console.log(res)
       this.setState({
         isSaving: false,
+        isResultError: false,
         saveResultMsg: "Successfully Saved!"
       })
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
       this.setState({
         isSaving: false,
-        saveResultMsg: "Something went wrong, please try again later."
+        isResultError: true,
+        saveResultMsg: e.message
       })
     }
   }
@@ -540,8 +576,14 @@ export class ProductTable extends Component {
 
     // when deleting parent product
     if (!parentSku) {
-      newData = _.filter(data, product =>
-        product.sku !== sku)
+      newData = _.filter(data, product => {
+        if (product.sku !== sku) {
+          return true
+        }
+        this.setState(prevState => ({
+          deletedDocIds: [...prevState.deletedDocIds, product.id]
+        }), () => console.log(this.state))
+      })
     }
     // when deleting child product
     else {
@@ -640,23 +682,21 @@ export class ProductTable extends Component {
           open={this.state.modalOpen}
           onClose={!this.state.isSaving ? this.handleModalClose : null}
           basic
-          size='mini'
+          size={this.state.isResultError ? "tiny" : "mini"}
         >
           {this.state.isSaving
             ? <Loader size='massive'>Saving...</Loader>
             : <Fragment>
               <Header
                 size="huge"
-                icon='save outline'
+                icon={this.state.isResultError ? "warning sign" : "save outline"}
                 content={this.state.saveResultMsg} />
-
               <Modal.Actions>
                 <Button color='green' onClick={this.handleModalClose} inverted>
                   <Icon name='checkmark' /> Got it
                 </Button>
               </Modal.Actions>
             </Fragment>}
-
         </Modal>
       </Container>
     );
