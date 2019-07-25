@@ -6,9 +6,7 @@ import _ from 'lodash'
 import styled from 'styled-components'
 import axios from 'axios'
 import uuidv1 from 'uuid/v1'
-
-const BULLET_WIDTH = 200
-const TITLE_WIDTH = 500
+import Columns from './Columns'
 
 const Container = styled.div`
   text-align: right;
@@ -24,29 +22,6 @@ const StyledButton = styled(Button)`
     margin: 1em 2em 1em 0;
   }
 `
-const BasicInfo = styled.div`
-  background-color: #eab9b9;
-  box-shadow: 0 0 5px 5px #eab9b9;
-`
-const BulletPoints = styled.div`
-  background-color: #b2e8b8;
-  box-shadow: 0 0 5px 5px #b2e8b8;
-`
-const Inventory = styled.div`
-  background-color: #b2c4ea;
-  box-shadow: 0 0 5px 5px #b2c4ea;
-`
-const Images = styled.div`
-  background-color: #e2e2a3;
-  box-shadow: 0 0 5px 5px #e2e2a3;
-`
-const Actions = styled.div`
-  background-color: #e8c4a2;
-  box-shadow: 0 0 5px 5px #e8c4a2;
-`
-
-
-
 
 
 export class ProductTable extends Component {
@@ -57,6 +32,8 @@ export class ProductTable extends Component {
     isResultError: false,
     data: [],
     deletedDocIds: [],
+    columns: [],
+    variationColumns: [],
   }
 
   async componentDidMount() {
@@ -136,323 +113,25 @@ export class ProductTable extends Component {
 
 
 
-
-  columns = [
-    {
-      Header: <BasicInfo>Basic Info</BasicInfo>,
-      columns: [
-        {
-          Header: 'SKU',
-          accessor: 'sku',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Product ID',
-          accessor: 'pid',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Product ID Type',
-          accessor: 'pidType',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Category',
-          accessor: 'category',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Title',
-          accessor: 'title',
-          minWidth: TITLE_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Color Map',
-          accessor: 'colorMap',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Size Map',
-          accessor: 'sizeMap',
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <BulletPoints>Bullet Points</BulletPoints>,
-      columns: [
-        {
-          Header: 'Bullet 1',
-          accessor: 'bulletPoints1',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 2',
-          accessor: 'bulletPoints2',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 3',
-          accessor: 'bulletPoints3',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 4',
-          accessor: 'bulletPoints4',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 5',
-          accessor: 'bulletPoints5',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <Inventory>Inventory</Inventory>,
-      columns: [
-        {
-          Header: 'Stock',
-          accessor: 'stock',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Sold Count',
-          accessor: 'soldCount',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'MIN Price',
-          accessor: 'minPrice',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'MAX Price',
-          accessor: 'maxPrice',
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <Actions>Actions</Actions>,
-      columns: [
-        {
-          Header: 'Actions',
-          accessor: 'actions',
-          minWidth: 200,
-          style: {
-            textAlign: 'center'
-          },
-          Cell: props =>
-            <div>
-              <Button
-                color="blue" size="mini"
-                onClick={() => this.handleAddVarClick(props)}>
-                ADD VAR
-              </Button>
-              <Button
-                color="red" size="mini"
-                onClick={() => this.handleDeleteClick(props)}>
-                DELETE
-              </Button>
-            </div>
-        }
-      ]
-    }
-  ]
-
-
-
-
-
-
-
-  variationColumns = [
-    {
-      Header: <BasicInfo>Basic Info</BasicInfo>,
-      columns: [
-        {
-          Header: 'SKU',
-          accessor: 'sku',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Product ID',
-          accessor: 'pid',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Product ID Type',
-          accessor: 'pidType',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Title',
-          accessor: 'title',
-          minWidth: TITLE_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Color',
-          accessor: 'color',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Color Map',
-          accessor: 'colorMap',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Size',
-          accessor: 'size',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Size Map',
-          accessor: 'sizeMap',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Material',
-          accessor: 'material',
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <BulletPoints>Bullet Points</BulletPoints>,
-      columns: [
-        {
-          Header: 'Bullet 1',
-          accessor: 'bulletPoints1',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 2',
-          accessor: 'bulletPoints2',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 3',
-          accessor: 'bulletPoints3',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 4',
-          accessor: 'bulletPoints4',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Bullet 5',
-          accessor: 'bulletPoints5',
-          minWidth: BULLET_WIDTH,
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <Inventory>Inventory</Inventory>,
-      columns: [
-        {
-          Header: 'Stock',
-          accessor: 'stock',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Sold Count',
-          accessor: 'soldCount',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Price',
-          accessor: 'price',
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <Images>Images</Images>,
-      columns: [
-        {
-          Header: 'Thumbnail',
-          accessor: 'thumbnail',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Main Image',
-          accessor: 'mainImage',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image1',
-          accessor: 'image1',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image2',
-          accessor: 'image2',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image3',
-          accessor: 'image3',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image4',
-          accessor: 'image4',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image5',
-          accessor: 'image5',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image6',
-          accessor: 'image6',
-          Cell: this.renderEditable,
-        },
-        {
-          Header: 'Image7',
-          accessor: 'image7',
-          Cell: this.renderEditable,
-        },
-      ]
-    },
-    {
-      Header: <Actions>Actions</Actions>,
-      columns: [
-        {
-          Header: 'Actions',
-          accessor: 'actions',
-          style: {
-            textAlign: 'center'
-          },
-          Cell: props =>
-            <Button
-              color="red" size="mini"
-              onClick={() => this.handleDeleteClick(props)}>
-              DELETE
-            </Button>
-        }
-      ]
-    }
-  ]
+  getColumns = (columns, variationColumns) => {
+    this.setState({ columns, variationColumns })
+  }
 
 
   validateData = () => {
 
+  }
+
+  showError = (e) => {
+    const errorMsg = e.response
+      ? e.response.data.message
+      : e.message
+    this.setState({
+      modalOpen: true,
+      isSaving: false,
+      isResultError: true,
+      saveResultMsg: errorMsg
+    })
   }
 
 
@@ -460,12 +139,7 @@ export class ProductTable extends Component {
     try {
       this.state.data.forEach(product => {
         if (product.sku.trim() === "") {
-          // TODO: fix here - make catch block
-          this.setState({
-            modalOpen: true,
-            isResultError: true,
-            saveResultMsg: "Please enter parent SKU to add variations."
-          })
+          throw new Error("Please enter parent SKU to add variations.")
         }
       })
 
@@ -505,7 +179,7 @@ export class ProductTable extends Component {
         })
       }))
     } catch (e) {
-
+      this.showError(e)
     }
   }
 
@@ -521,7 +195,7 @@ export class ProductTable extends Component {
           throw new Error("SKU cannot be empty")
         }
       })
-      await data.forEach(product => {
+      data.forEach(product => {
         product.bulletPoints = [
           product.bulletPoints1,
           product.bulletPoints2,
@@ -529,6 +203,15 @@ export class ProductTable extends Component {
           product.bulletPoints4,
           product.bulletPoints5,
         ]
+        product.variations.forEach(variation => {
+          variation.bulletPoints = [
+            variation.bulletPoints1,
+            variation.bulletPoints2,
+            variation.bulletPoints3,
+            variation.bulletPoints4,
+            variation.bulletPoints5,
+          ]
+        })
       })
       const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', data)
       console.log(res)
@@ -538,12 +221,7 @@ export class ProductTable extends Component {
         saveResultMsg: "Successfully Saved!"
       })
     } catch (e) {
-      console.log(e)
-      this.setState({
-        isSaving: false,
-        isResultError: true,
-        saveResultMsg: e.message
-      })
+      this.showError(e)
     }
   }
 
@@ -623,7 +301,7 @@ export class ProductTable extends Component {
         </StyledButton>
         <ReactTable
           data={data}
-          columns={this.columns}
+          columns={this.state.columns}
           defaultPageSize={10}
           className="-striped -highlight"
           minRows={5}
@@ -656,7 +334,7 @@ export class ProductTable extends Component {
               <div style={{ padding: '20px' }}>
                 <ReactTable
                   data={_.find(this.state.data, { 'pid': row.original.pid }).variations}
-                  columns={this.variationColumns}
+                  columns={this.state.variationColumns}
                   minRows={10}
                   defaultPageSize={10}
                   noDataText={"No variations"}
@@ -677,7 +355,11 @@ export class ProductTable extends Component {
           }}
         />
 
-
+        <Columns
+          renderEditable={this.renderEditable}
+          handleAddVarClick={this.handleAddVarClick}
+          handleDeleteClick={this.handleDeleteClick}
+          getColumns={this.getColumns} />
         <Modal
           open={this.state.modalOpen}
           onClose={!this.state.isSaving ? this.handleModalClose : null}
