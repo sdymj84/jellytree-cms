@@ -9,12 +9,16 @@ import uuidv1 from 'uuid/v1'
 import Columns from './Columns'
 
 const Container = styled.div`
-  text-align: right;
   .rt-td {
-    padding: 4px 5px;
-    text-align: left;
-    border-radius: 3px;
+    padding: 0;
+    padding-bottom: 0.2px;
+    overflow: visible;
+  }
+  i.icon.angle.right,
+  i.icon.angle.down {
     font-size: 1.1em;
+    margin: 4px 2px;
+    padding: 6px 10px;
   }
 `
 const StyledButton = styled(Button)`
@@ -75,41 +79,24 @@ export class ProductTable extends Component {
 
 
 
-  renderEditable = (cellInfo) => {
-    const product = cellInfo.original
-    const column = cellInfo.column.id
-    return (
-      <div
-        style={{
-          outline: 'none',
-          height: '100%',
-          paddingTop: '3px',
-        }}
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={e => {
-          const data = [...this.state.data];
-          _.forEach(data, (item) => {
-            if (item.id === product.id) {
-              item[column] = e.target.innerText
-            }
-            if (item.sku === product.parentSku) {
-              _.forEach(item.variations, vItem => {
-                if (vItem.sku === product.sku) {
-                  vItem[column] = e.target.innerText
-                }
-              })
-            }
-          })
-          this.setState({ data });
-        }}
-        dangerouslySetInnerHTML={{
-          __html: product[column]
-        }}
-      />
-    );
-  }
 
+
+  handleCellBlur = (e, product, column) => {
+    const data = [...this.state.data];
+    _.forEach(data, (item) => {
+      if (item.id === product.id) {
+        item[column] = e.target.innerText
+      }
+      if (item.sku === product.parentSku) {
+        _.forEach(item.variations, vItem => {
+          if (vItem.sku === product.sku) {
+            vItem[column] = e.target.innerText
+          }
+        })
+      }
+    })
+    this.setState({ data });
+  }
 
 
 
@@ -118,6 +105,7 @@ export class ProductTable extends Component {
   }
 
 
+  // Validate if any required data is empty
   validateData = (data) => {
     this.setState({
       modalOpen: true,
@@ -134,9 +122,66 @@ export class ProductTable extends Component {
         if (product.title.trim() === "") {
           errorMessages.push("Title is required")
         }
+
+        product.variations.forEach(variation => {
+          /* if (variation.sku.trim() === "") {
+            errorMessages.push("SKU is required for variations")
+          }
+          if (variation.pid.trim() === "") {
+            errorMessages.push("Product ID is required for variations")
+          }
+          if (variation.pidType.trim() === "") {
+            errorMessages.push("Product ID Type is required for variations")
+          }
+          if (variation.title.trim() === "") {
+            errorMessages.push("Title is required for variations")
+          }
+          if (variation.color.trim() === "") {
+            errorMessages.push("Color is required for variations")
+          }
+          if (!variation.colorMap.length) {
+            errorMessages.push("Color Map is required for variations")
+          }
+          if (variation.size.trim() === "") {
+            errorMessages.push("Size is required for variations")
+          }
+          if (!variation.sizeMap.length) {
+            errorMessages.push("Size Map is required for variations")
+          }
+          if (!variation.material.length) {
+            errorMessages.push("Material is required for variations")
+          }
+          if (variation.thumbnail.trim() === "") {
+            errorMessages.push("Thumbnail is required for variations")
+          }
+          if (variation.mainImage.trim() === "") {
+            errorMessages.push("Main Image is required for variations")
+          }
+          if (variation.stock.trim() === "") {
+            errorMessages.push("Stock is required for variations")
+          }
+          if (variation.price.trim() === "") {
+            errorMessages.push("Price is required for variations")
+          } */
+
+
+
+
+          if (!/^(0|[1-9]\d*)$/.test(variation.stock.trim())) {
+            errorMessages.push("Stock should be a positive integer")
+          }
+          if (!/^(0|[1-9]\d*)\.[0-9]{2}$/.test(variation.price.trim())) {
+            errorMessages.push("Price is incorrectly formatted - please indicate two digits of cents followed by dot (.) (ex. 12.99)")
+          }
+          if (Number(variation.price) === 0) {
+            errorMessages.push("Price of 0 is not allowed")
+          }
+
+
+        })
       })
       if (errorMessages.length) {
-        throw new Error(errorMessages)
+        throw new Error(_.uniq(errorMessages))
       }
       return true
     } catch (e) {
@@ -144,6 +189,56 @@ export class ProductTable extends Component {
       this.showError(e)
       return false
     }
+  }
+
+  // Calculate stock, soldCount, minPrice, maxPrice
+  // Copy bulletPoints, images into array
+  reorganizeData = (data) => {
+    data.forEach(product => {
+      product.bulletPoints = [
+        product.bulletPoints1,
+        product.bulletPoints2,
+        product.bulletPoints3,
+        product.bulletPoints4,
+        product.bulletPoints5,
+      ]
+      product.stock = 0
+
+      const minPrice = _.minBy(product.variations, v => Number(v.price)).price
+      console.log(minPrice)
+      if (minPrice) {
+        product.minPrice = minPrice
+      }
+      const maxPrice = _.maxBy(product.variations, v => Number(v.price)).price
+      console.log(maxPrice)
+      if (maxPrice) {
+        product.maxPrice = maxPrice
+      }
+
+      product.variations.forEach(variation => {
+        variation.bulletPoints = [
+          variation.bulletPoints1,
+          variation.bulletPoints2,
+          variation.bulletPoints3,
+          variation.bulletPoints4,
+          variation.bulletPoints5,
+        ]
+        variation.images = [
+          variation.image1,
+          variation.image2,
+          variation.image3,
+          variation.image4,
+          variation.image5,
+          variation.image6,
+          variation.image7,
+        ]
+        variation.parentSku = product.sku
+        variation.stock = variation.stock.trim()
+        variation.price = variation.price.trim()
+        product.stock = Number(product.stock) + Number(variation.stock)
+      })
+    })
+    return data
   }
 
   showError = (e) => {
@@ -188,9 +283,9 @@ export class ProductTable extends Component {
                 sizeMap: [],
                 material: [],
                 bulletPoints: [],
-                stock: 0,
-                soldCount: 0,
-                price: '',
+                stock: '0',
+                soldCount: '0',
+                price: '0',
                 thumbnail: '',
                 mainImage: '',
                 images: [],
@@ -208,35 +303,22 @@ export class ProductTable extends Component {
   handleSaveClick = async () => {
     const data = this.state.data
     this.setState({ isSaving: true })
+
+    // Validate if any requried data is empty
     if (!this.validateData(data)) {
       return
     }
+    // Calculate and reorganize some data
+    const newData = this.reorganizeData(data)
 
     try {
-      data.forEach(product => {
-        product.bulletPoints = [
-          product.bulletPoints1,
-          product.bulletPoints2,
-          product.bulletPoints3,
-          product.bulletPoints4,
-          product.bulletPoints5,
-        ]
-        product.variations.forEach(variation => {
-          variation.bulletPoints = [
-            variation.bulletPoints1,
-            variation.bulletPoints2,
-            variation.bulletPoints3,
-            variation.bulletPoints4,
-            variation.bulletPoints5,
-          ]
-        })
-      })
-      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', data)
+      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', newData)
       console.log(res)
       this.setState({
         isSaving: false,
         isResultError: false,
-        saveResultMsg: "Successfully Saved!"
+        saveResultMsg: "Successfully Saved!",
+        data: newData,
       })
     } catch (e) {
       this.showError(e)
@@ -255,10 +337,10 @@ export class ProductTable extends Component {
         colorMap: [],
         sizeMap: [],
         bulletPoints: [],
-        stock: 0,
-        soldCount: 0,
-        minPrice: 0,
-        maxPrice: 0,
+        stock: '0',
+        soldCount: '0',
+        minPrice: '0',
+        maxPrice: '0',
         variations: [],
       }, ...prevState.data]
     }))
@@ -307,16 +389,30 @@ export class ProductTable extends Component {
     const { data } = this.state;
     return (
       <Container>
-        <StyledButton
-          color="blue"
-          onClick={this.handleNewClick}>
-          NEW
-        </StyledButton>
-        <StyledButton
-          color="green"
-          onClick={this.handleSaveClick}>
-          SAVE
-        </StyledButton>
+        <div
+          style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+          <div
+            style={{
+              marginLeft: '4em',
+            }}>
+            <span style={{ color: 'red' }}>*</span>
+            {' '}is required field to save
+          </div>
+          <div>
+            <StyledButton
+              color="blue"
+              onClick={this.handleNewClick}>
+              NEW
+          </StyledButton>
+            <StyledButton
+              color="green"
+              onClick={this.handleSaveClick}>
+              SAVE
+          </StyledButton>
+          </div>
+        </div>
         <ReactTable
           data={data}
           columns={this.state.columns}
@@ -374,7 +470,7 @@ export class ProductTable extends Component {
         />
 
         <Columns
-          renderEditable={this.renderEditable}
+          handleCellBlur={this.handleCellBlur}
           handleAddVarClick={this.handleAddVarClick}
           handleDeleteClick={this.handleDeleteClick}
           getColumns={this.getColumns} />

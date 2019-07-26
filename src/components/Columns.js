@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect } from 'react'
 import styled from 'styled-components'
-import { Button } from 'semantic-ui-react'
+import { Button, Dropdown } from 'semantic-ui-react'
+import _ from 'lodash'
 
 const BULLET_WIDTH = 200
 const TITLE_WIDTH = 500
@@ -25,6 +26,19 @@ const Actions = styled.div`
   background-color: #e8c4a2;
   box-shadow: 0 0 5px 5px #e8c4a2;
 `
+const StyledDropdown = styled(Dropdown)`
+  min-height: 0;
+`
+
+const CellContainer = styled.div`
+  outline: none;
+  height: 100%;
+  min-height: 40px;
+  padding: ${p => p.dropdown ? '0' : '9px 6px'};
+  text-align: left;
+  border-radius: 3px;
+  font-size: 1.1em;
+`
 
 const Required = (props) => {
   return (
@@ -38,12 +52,76 @@ const Required = (props) => {
 }
 
 
+
 const Columns = (props) => {
 
   useEffect(() => {
     props.getColumns(columns, variationColumns)
     // eslint-disable-next-line 
   }, [])
+
+
+  const renderEditable = (cellInfo) => {
+    const product = cellInfo.original
+    const column = cellInfo.column.id
+    return (
+      <CellContainer
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={(e) => props.handleCellBlur(e, product, column)}
+        dangerouslySetInnerHTML={{
+          __html: product[column]
+        }}
+      />
+    );
+  }
+
+  const readOnlyCell = (cellInfo) => {
+    const product = cellInfo.original
+    const column = cellInfo.column.id
+    return (
+      <CellContainer
+        dangerouslySetInnerHTML={{
+          __html: product[column]
+        }}
+      />
+    )
+  }
+
+
+  const colors = ['White', 'Blue', 'Grey', 'Navy', 'Pink']
+  const colorOptions = _.map(colors, color => ({
+    key: color,
+    text: color,
+    value: color,
+  }))
+
+  const sizes = ['0-3M', '3-6M', '6-12M', '12-24M']
+  const sizeOptions = _.map(sizes, size => ({
+    key: size,
+    text: size,
+    value: size,
+  }))
+
+  const renderDropdown = (item) => {
+    return (
+      <CellContainer dropdown>
+        <StyledDropdown
+          placeholder={item === 'color'
+            ? 'Color Map'
+            : 'Size Map'}
+          fluid
+          multiple
+          search
+          selection
+          options={item === 'color'
+            ? colorOptions
+            : sizeOptions}
+        />
+      </CellContainer>
+    )
+  }
+
 
   const columns = [
     {
@@ -52,39 +130,39 @@ const Columns = (props) => {
         {
           Header: <Required title="SKU" />,
           accessor: 'sku',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Product ID',
           accessor: 'pid',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Product ID Type',
           accessor: 'pidType',
           minWidth: 125,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Category" />,
           accessor: 'category',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Title" />,
           accessor: 'title',
           minWidth: TITLE_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Color Map',
           accessor: 'colorMap',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Size Map',
           accessor: 'sizeMap',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
@@ -95,31 +173,31 @@ const Columns = (props) => {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
@@ -129,22 +207,22 @@ const Columns = (props) => {
         {
           Header: 'Stock',
           accessor: 'stock',
-          Cell: props.renderEditable,
+          Cell: readOnlyCell,
         },
         {
           Header: 'Sold Count',
           accessor: 'soldCount',
-          Cell: props.renderEditable,
+          Cell: readOnlyCell,
         },
         {
           Header: 'MIN Price',
           accessor: 'minPrice',
-          Cell: props.renderEditable,
+          Cell: readOnlyCell,
         },
         {
           Header: 'MAX Price',
           accessor: 'maxPrice',
-          Cell: props.renderEditable,
+          Cell: readOnlyCell,
         },
       ]
     },
@@ -189,49 +267,51 @@ const Columns = (props) => {
         {
           Header: <Required title="SKU" />,
           accessor: 'sku',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Product ID" />,
           accessor: 'pid',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Product ID Type" />,
           accessor: 'pidType',
           minWidth: 125,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Title" />,
           accessor: 'title',
           minWidth: TITLE_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Color" />,
           accessor: 'color',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Color Map" />,
           accessor: 'colorMap',
-          Cell: props.renderEditable,
+          minWidth: 200,
+          Cell: () => renderDropdown('color'),
         },
         {
           Header: <Required title="Size" />,
           accessor: 'size',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Size Map" />,
           accessor: 'sizeMap',
-          Cell: props.renderEditable,
+          minWidth: 200,
+          Cell: () => renderDropdown('size'),
         },
         {
           Header: <Required title="Material" />,
           accessor: 'material',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
@@ -242,31 +322,31 @@ const Columns = (props) => {
           Header: 'Bullet 1',
           accessor: 'bulletPoints1',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 2',
           accessor: 'bulletPoints2',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 3',
           accessor: 'bulletPoints3',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 4',
           accessor: 'bulletPoints4',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Bullet 5',
           accessor: 'bulletPoints5',
           minWidth: BULLET_WIDTH,
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
@@ -274,19 +354,19 @@ const Columns = (props) => {
       Header: <Inventory>Inventory</Inventory>,
       columns: [
         {
-          Header: 'Stock',
+          Header: <Required title="Stock" />,
           accessor: 'stock',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Sold Count',
           accessor: 'soldCount',
-          Cell: props.renderEditable,
+          Cell: readOnlyCell,
         },
         {
-          Header: 'Price',
+          Header: <Required title="Price" />,
           accessor: 'price',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
@@ -296,47 +376,47 @@ const Columns = (props) => {
         {
           Header: <Required title="Thumbnail" />,
           accessor: 'thumbnail',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: <Required title="Main Image" />,
           accessor: 'mainImage',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image1',
           accessor: 'image1',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image2',
           accessor: 'image2',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image3',
           accessor: 'image3',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image4',
           accessor: 'image4',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image5',
           accessor: 'image5',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image6',
           accessor: 'image6',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
         {
           Header: 'Image7',
           accessor: 'image7',
-          Cell: props.renderEditable,
+          Cell: renderEditable,
         },
       ]
     },
