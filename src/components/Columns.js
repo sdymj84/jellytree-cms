@@ -103,7 +103,10 @@ const Columns = (props) => {
     value: size,
   }))
 
-  const renderDropdown = (item) => {
+
+  const renderDropdown = (cellInfo, item) => {
+    const product = cellInfo.original
+    const column = cellInfo.column.id
     return (
       <CellContainer dropdown>
         <StyledDropdown
@@ -112,11 +115,14 @@ const Columns = (props) => {
             : 'Size Map'}
           fluid
           multiple
-          search
+          // search
           selection
+          onChange={(e, { value }) =>
+            props.handleDropdownChange(value, product, column)}
           options={item === 'color'
             ? colorOptions
             : sizeOptions}
+          value={product[column]}
         />
       </CellContainer>
     )
@@ -234,7 +240,8 @@ const Columns = (props) => {
           accessor: 'actions',
           minWidth: 200,
           style: {
-            textAlign: 'center'
+            textAlign: 'center',
+            paddingTop: '5.5px',
           },
           Cell: cellInfo =>
             <div>
@@ -294,8 +301,8 @@ const Columns = (props) => {
         {
           Header: <Required title="Color Map" />,
           accessor: 'colorMap',
-          minWidth: 200,
-          Cell: () => renderDropdown('color'),
+          minWidth: 220,
+          Cell: (cellInfo) => renderDropdown(cellInfo, 'color'),
         },
         {
           Header: <Required title="Size" />,
@@ -306,7 +313,7 @@ const Columns = (props) => {
           Header: <Required title="Size Map" />,
           accessor: 'sizeMap',
           minWidth: 200,
-          Cell: () => renderDropdown('size'),
+          Cell: (cellInfo) => renderDropdown(cellInfo, 'size'),
         },
         {
           Header: <Required title="Material" />,
@@ -427,7 +434,8 @@ const Columns = (props) => {
           Header: 'Actions',
           accessor: 'actions',
           style: {
-            textAlign: 'center'
+            textAlign: 'center',
+            paddingTop: '6px',
           },
           Cell: cellInfo =>
             <Button

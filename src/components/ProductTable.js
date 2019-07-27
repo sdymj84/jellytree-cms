@@ -12,7 +12,6 @@ const Container = styled.div`
   .rt-td {
     padding: 0;
     padding-bottom: 0.2px;
-    overflow: visible;
   }
   i.icon.angle.right,
   i.icon.angle.down {
@@ -40,6 +39,7 @@ export class ProductTable extends Component {
     variationColumns: [],
   }
 
+  // When component mounts, get data from db > reorganize data > save to state
   async componentDidMount() {
     try {
       const res = await axios.get('https://us-central1-jellytree-3cb33.cloudfunctions.net/listProducts')
@@ -77,10 +77,13 @@ export class ProductTable extends Component {
     }
   }
 
+  // Column component mounts > call this and get column data from Columns
+  // and apply to ReactTable component
+  getColumns = (columns, variationColumns) => {
+    this.setState({ columns, variationColumns })
+  }
 
-
-
-
+  // Save data to state when cell blur
   handleCellBlur = (e, product, column) => {
     const data = [...this.state.data];
     _.forEach(data, (item) => {
@@ -98,14 +101,7 @@ export class ProductTable extends Component {
     this.setState({ data });
   }
 
-
-
-  getColumns = (columns, variationColumns) => {
-    this.setState({ columns, variationColumns })
-  }
-
-
-  // Validate if any required data is empty
+  // Validate when saving if any required data is empty
   validateData = (data) => {
     this.setState({
       modalOpen: true,
@@ -124,7 +120,7 @@ export class ProductTable extends Component {
         }
 
         product.variations.forEach(variation => {
-          /* if (variation.sku.trim() === "") {
+          if (variation.sku.trim() === "") {
             errorMessages.push("SKU is required for variations")
           }
           if (variation.pid.trim() === "") {
@@ -162,11 +158,7 @@ export class ProductTable extends Component {
           }
           if (variation.price.trim() === "") {
             errorMessages.push("Price is required for variations")
-          } */
-
-
-
-
+          }
           if (!/^(0|[1-9]\d*)$/.test(variation.stock.trim())) {
             errorMessages.push("Stock should be a positive integer")
           }
@@ -176,10 +168,12 @@ export class ProductTable extends Component {
           if (Number(variation.price) === 0) {
             errorMessages.push("Price of 0 is not allowed")
           }
-
-
         })
       })
+      if (_.uniqBy(data, 'sku').length !== data.length) {
+        errorMessages.push("Found duplicated SKU that has to be unique")
+      }
+
       if (errorMessages.length) {
         throw new Error(_.uniq(errorMessages))
       }
@@ -202,17 +196,21 @@ export class ProductTable extends Component {
         product.bulletPoints4,
         product.bulletPoints5,
       ]
+      _.remove(product.bulletPoints, bp => !bp)
       product.stock = 0
+      product.colorMap = []
+      product.sizeMap = []
 
-      const minPrice = _.minBy(product.variations, v => Number(v.price)).price
-      console.log(minPrice)
-      if (minPrice) {
-        product.minPrice = minPrice
-      }
-      const maxPrice = _.maxBy(product.variations, v => Number(v.price)).price
-      console.log(maxPrice)
-      if (maxPrice) {
-        product.maxPrice = maxPrice
+      if (product.variations.length) {
+        const minPrice = _.minBy(product.variations, v => Number(v.price)).price
+        if (minPrice) {
+          product.minPrice = minPrice
+        }
+        const maxPrice = _.maxBy(product.variations, v => Number(v.price)).price
+        if (maxPrice) {
+          product.maxPrice = maxPrice
+        }
+        product.frontProductSku = _.maxBy(product.variations, 'soldCount').sku
       }
 
       product.variations.forEach(variation => {
@@ -223,6 +221,7 @@ export class ProductTable extends Component {
           variation.bulletPoints4,
           variation.bulletPoints5,
         ]
+        _.remove(variation.bulletPoints, bp => !bp)
         variation.images = [
           variation.image1,
           variation.image2,
@@ -232,15 +231,21 @@ export class ProductTable extends Component {
           variation.image6,
           variation.image7,
         ]
+        _.remove(variation.images, image => !image)
         variation.parentSku = product.sku
         variation.stock = variation.stock.trim()
         variation.price = variation.price.trim()
         product.stock = Number(product.stock) + Number(variation.stock)
+        product.colorMap.push(...variation.colorMap)
+        product.colorMap = _.uniq(product.colorMap)
+        product.sizeMap.push(...variation.sizeMap)
+        product.sizeMap = _.uniq(product.sizeMap)
       })
     })
     return data
   }
 
+  // Show error
   showError = (e) => {
     let errorMsg = e.response
       ? e.response.data.message
@@ -255,7 +260,31 @@ export class ProductTable extends Component {
     })
   }
 
+  // Set each cell's styles (.rt-td)
+  setTdStyles = (state, rowInfo, column) => {
+    let styles = ""
+    if (rowInfo) {
+      styles = {
+        border: '1px solid #439e92',
+        borderRadius: '3px',
+      }
+      if (column.id === 'colorMap' || column.id === 'sizeMap') {
+        styles = {
+          ...styles,
+          overflow: 'visible',
+        }
+      }
+    } else {
+      styles = {
+        border: 'none',
+      }
+    }
+    return {
+      style: styles
+    }
+  }
 
+  // AddVar button event handler
   handleAddVarClick = (props) => {
     const { id, sku } = props.original
 
@@ -300,6 +329,7 @@ export class ProductTable extends Component {
     }))
   }
 
+  // Save button event handler
   handleSaveClick = async () => {
     const data = this.state.data
     this.setState({ isSaving: true })
@@ -311,8 +341,11 @@ export class ProductTable extends Component {
     // Calculate and reorganize some data
     const newData = this.reorganizeData(data)
 
+    const deletedDocIds = this.state.deletedDocIds
+
     try {
-      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts', newData)
+      const res = await axios.post('https://us-central1-jellytree-3cb33.cloudfunctions.net/setProducts',
+        { data: newData, deletedDocIds })
       console.log(res)
       this.setState({
         isSaving: false,
@@ -325,6 +358,7 @@ export class ProductTable extends Component {
     }
   }
 
+  // New button event handler
   handleNewClick = () => {
     this.setState(prevState => ({
       data: [{
@@ -346,6 +380,7 @@ export class ProductTable extends Component {
     }))
   }
 
+  // Delete button event handler
   handleDeleteClick = (props) => {
     const parentSku = props.original.parentSku
     const sku = props.original.sku
@@ -380,13 +415,27 @@ export class ProductTable extends Component {
     this.setState({ data: newData })
   }
 
+  handleDropdownChange = (value, product, column) => {
+    const data = [...this.state.data];
+    _.forEach(data, (item) => {
+      if (item.sku === product.parentSku) {
+        _.forEach(item.variations, vItem => {
+          if (vItem.sku === product.sku) {
+            vItem[column] = value
+          }
+        })
+      }
+    })
+    this.setState({ data })
+  }
+
   handleModalClose = () => {
     this.setState({ modalOpen: false })
   }
 
-
   render() {
     const { data } = this.state;
+    console.log(this.state.deletedDocIds)
     return (
       <Container>
         <div
@@ -447,22 +496,13 @@ export class ProductTable extends Component {
             return (
               <div style={{ padding: '20px' }}>
                 <ReactTable
-                  data={_.find(this.state.data, { 'pid': row.original.pid }).variations}
+                  data={_.find(this.state.data, { 'sku': row.original.sku }).variations}
                   columns={this.state.variationColumns}
                   minRows={10}
                   defaultPageSize={10}
                   noDataText={"No variations"}
                   showPagination={false}
-                  getTdProps={(state, rowInfo) => {
-                    return {
-                      style: {
-                        border: rowInfo
-                          ? '1px solid #439e92'
-                          : 'none',
-                        borderRadius: '3px',
-                      }
-                    }
-                  }}
+                  getTdProps={this.setTdStyles}
                 />
               </div>
             )
@@ -473,6 +513,7 @@ export class ProductTable extends Component {
           handleCellBlur={this.handleCellBlur}
           handleAddVarClick={this.handleAddVarClick}
           handleDeleteClick={this.handleDeleteClick}
+          handleDropdownChange={this.handleDropdownChange}
           getColumns={this.getColumns} />
         <Modal
           open={this.state.modalOpen}
