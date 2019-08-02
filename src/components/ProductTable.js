@@ -73,7 +73,8 @@ export class ProductTable extends Component {
 
       this.setState({ data })
     } catch (e) {
-      console.log("Error getting products data", e)
+      console.log("Error getting products data")
+      this.showError(e)
     }
   }
 
@@ -435,7 +436,6 @@ export class ProductTable extends Component {
 
   render() {
     const { data } = this.state;
-    console.log(this.state.deletedDocIds)
     return (
       <Container>
         <div
