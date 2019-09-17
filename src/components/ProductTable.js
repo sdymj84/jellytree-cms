@@ -454,7 +454,7 @@ export class ProductTable extends Component {
               color="blue"
               onClick={this.handleNewClick}>
               NEW
-          </StyledButton>
+            </StyledButton>
             <StyledButton
               color="green"
               onClick={this.handleSaveClick}>
