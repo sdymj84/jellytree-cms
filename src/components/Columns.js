@@ -89,14 +89,16 @@ const Columns = (props) => {
   }
 
 
-  const colors = ['White', 'Blue', 'Grey', 'Navy', 'Pink']
-  const colorOptions = _.map(colors, color => ({
+  const colors = ['White', 'Blue', 'Grey', 'Navy', 'Pink',
+    'Black', 'Beige', 'Ivory', 'Brown', 'Orange', 'Red', 'Yellow']
+  const colorOptions = _.map(_.sortBy(colors), color => ({
     key: color,
     text: color,
     value: color,
   }))
 
-  const sizes = ['0-3M', '3-6M', '6-12M', '12-24M']
+  const sizes = ['0-3M', '3-6M', '6-12M', '12-24M',
+    '2-7T', '8-12T', 'Teen']
   const sizeOptions = _.map(sizes, size => ({
     key: size,
     text: size,
